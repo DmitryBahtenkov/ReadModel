@@ -5,7 +5,7 @@ namespace ReadModel.Pg;
 
 public sealed class PgContext : DbContext
 {
-    public DbSet<Employee> Employees { get; set; }
+    public DbSet<Employee?> Employees { get; set; }
 
     public PgContext()
     {
