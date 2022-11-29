@@ -1,4 +1,5 @@
-﻿using ReadModel.Elastic;
+﻿using Microsoft.EntityFrameworkCore;
+using ReadModel.Elastic;
 using ReadModel.Models;
 using ReadModel.Pg;
 
@@ -51,5 +52,41 @@ public class EmployeeService
         await _elasticRepository.DeleteDocument(result.Entity);
 
         return result.Entity;
+    }
+
+    public async Task<List<Employee>> All()
+    {
+        return await _pgContext.Employees.ToListAsync();
+    }
+
+    public async Task<List<Employee>> Search(
+        string text, 
+        string? city = null,
+        string? university = null,
+        DateTime? fromStartDate = null)
+    {
+        var query = _pgContext.Employees.Where(x => x.Email == text
+                                                    || text.Contains(x.FirstName)
+                                                    || text.Contains(x.LastName)
+                                                    || text.Contains(x.MiddleName ?? "empty")
+                                                    || x.PhoneNumber == text
+        );
+
+        if (!string.IsNullOrEmpty(city))
+        {
+            query = query.Where(x => x.City == city);
+        }
+
+        if (!string.IsNullOrEmpty(university))
+        {
+            query = query.Where(x => x.University == university);
+        }
+
+        if (fromStartDate.HasValue)
+        {
+            query = query.Where(x => x.StartWorkingDate >= fromStartDate.Value);
+        }
+
+        return await query.ToListAsync();
     }
 }
