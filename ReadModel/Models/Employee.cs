@@ -23,6 +23,6 @@ public class Employee
 
 public enum DegreeOfEducation
 {
-    Bachelor,
-    Master
+    Bachelor = 0,
+    Master = 1
 }

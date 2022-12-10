@@ -7,6 +7,7 @@ services:
     hostname: "redis"
     ports:
       - "6379:6379"
+
   postgres:
     image: postgres:15
     environment:
@@ -19,6 +20,8 @@ services:
     ports:
       - "5432:5432"
   elastic:
-    image: elasticsearch:8.5.2
+    image: elasticsearch:7.0.0
     ports:
       - '9200:9200'
+    environment:
+      discovery.type: single-node
