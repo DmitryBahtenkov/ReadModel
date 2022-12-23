@@ -20,22 +20,22 @@ public class ElasticRepository
         await _elasticClient.IndexAsync(employee, request => request.Index(IndexName));
     }
 
-    public async IAsyncEnumerable<Employee> Search(SearchDescriptor<Employee> searchDescriptor)
+    public async Task<List<Employee>> Search(SearchDescriptor<Employee> searchDescriptor)
     {
-        var response = await _elasticClient.SearchAsync<Employee>(searchDescriptor);
-        foreach (var hit in response.Hits)
-        {
-            yield return hit.Source;
-        }
+        var response = await _elasticClient.SearchAsync<Employee>(searchDescriptor.AllIndices());
+        
+        return response.Hits.Select(x => x.Source).ToList();
     }
 
     public async Task UpdateDocument(Employee employee)
     {
-        await _elasticClient.UpdateAsync(DocumentPath<Employee>.Id(employee), x => x.Upsert(employee));
+        await _elasticClient.IndexAsync(employee, x => x
+            .Index(IndexName) 
+            .Id(employee.Id));
     }
 
     public async Task DeleteDocument(Employee employee)
     {
-        await _elasticClient.DeleteAsync(DocumentPath<Employee>.Id(employee));
+        await _elasticClient.DeleteAsync(DocumentPath<Employee>.Id(employee), x => x.Index(IndexName));
     }
 }

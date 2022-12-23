@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Nest;
 using ReadModel.Elastic;
 using ReadModel.Models;
 using ReadModel.Pg;
@@ -63,8 +64,43 @@ public class EmployeeService
         string text, 
         string? city = null,
         string? university = null,
-        DateTime? fromStartDate = null)
+        DateTime? fromStartDate = null,
+        bool useElastic = false)
     {
+        if (useElastic)
+        {
+            var q = new QueryContainerDescriptor<Employee>();
+            var queryContainer = q
+                .Fuzzy(f => f
+                    .Field(ff => ff.FirstName)
+                    .Value(text)) | 
+                q.Fuzzy(f => f
+                    .Field(ff => ff.LastName)
+                    .Value(text));
+
+            if (!string.IsNullOrEmpty(city))
+            {
+                queryContainer &= q.Term(x => x.City, city);
+            }
+            
+            if (!string.IsNullOrEmpty(university))
+            {
+                queryContainer &= q.Term(x => x.University, university);
+            }
+
+            if (fromStartDate.HasValue)
+            {
+                queryContainer &= q.DateRange(x => x
+                    .Field(f => f.StartWorkingDate)
+                    .GreaterThanOrEquals(fromStartDate));
+            }
+
+            var searchDescriptor = new SearchDescriptor<Employee>()
+                .Query(_ => queryContainer);
+
+            return await _elasticRepository.Search(searchDescriptor);
+        }
+
         var query = _pgContext.Employees.Where(x => x.Email == text
                                                     || text.Contains(x.FirstName)
                                                     || text.Contains(x.LastName)

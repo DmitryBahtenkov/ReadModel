@@ -11,8 +11,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<PgContext>();
 builder.Services.AddScoped<ElasticRepository>();
 builder.Services.AddScoped<EmployeeService>();
-builder.Services.AddSingleton<ElasticClient>(s => new ElasticClient(new Uri("http://localhost:9200/")));
-
+builder.Services.AddSingleton<ElasticClient>(s => new ElasticClient(new ConnectionSettings(new Uri("http://localhost:9200/"))
+{
+       
+});
 var app = builder.Build();
 // специальная настройка для работы с датой в ПГ
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
@@ -35,10 +37,7 @@ app.MapGet("api/employees/search", async (
     string? university,
     DateTime? fromStartDate) => 
     {
-        var stopwatch = Stopwatch.StartNew();
-        var result = await service.Search(text, city, university, fromStartDate);
-        logger.LogInformation("search {time} ms", stopwatch.ElapsedMilliseconds);
-        stopwatch.Stop();
+        var result = await service.Search(text, city, university, fromStartDate, true);
         return result;
     });
 
