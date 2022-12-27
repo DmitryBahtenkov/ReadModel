@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using Nest;
 
 namespace ReadModel.Models;
 
@@ -13,6 +14,7 @@ public class Employee
     public string PhoneNumber { get; set; }
     public string City { get; set; }
     public DateTime DateOfBirth { get; set; }
+    [Keyword]
     public string University { get; set; }
     [Column(TypeName = "varchar(24)")]
     public DegreeOfEducation DegreeOfEducation { get; set; }

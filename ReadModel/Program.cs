@@ -5,16 +5,15 @@ using ReadModel.Elastic;
 using ReadModel.Models;
 using ReadModel.Pg;
 using ReadModel.Services;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<PgContext>();
 builder.Services.AddScoped<ElasticRepository>();
 builder.Services.AddScoped<EmployeeService>();
-builder.Services.AddSingleton<ElasticClient>(s => new ElasticClient(new ConnectionSettings(new Uri("http://localhost:9200/"))
-{
-       
-});
+builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost"));
+builder.Services.AddSingleton<ElasticClient>(s => new ElasticClient(new ConnectionSettings(new Uri("http://localhost:9200/"))));
 var app = builder.Build();
 // специальная настройка для работы с датой в ПГ
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);

@@ -80,12 +80,16 @@ public class EmployeeService
 
             if (!string.IsNullOrEmpty(city))
             {
-                queryContainer &= q.Term(x => x.City, city);
+                queryContainer &= q.MatchPhrase(x => x
+                                        .Field(f => f.City)
+                                        .Query(city));
             }
             
             if (!string.IsNullOrEmpty(university))
             {
-                queryContainer &= q.Term(x => x.University, university);
+                queryContainer &= q.MatchPhrase(x => x
+                                        .Field(f => f.University)
+                                        .Query(university));
             }
 
             if (fromStartDate.HasValue)

@@ -1,4 +1,5 @@
-﻿using Nest;
+﻿using Elasticsearch.Net;
+using Nest;
 using ReadModel.Models;
 
 namespace ReadModel.Elastic;
@@ -22,8 +23,8 @@ public class ElasticRepository
 
     public async Task<List<Employee>> Search(SearchDescriptor<Employee> searchDescriptor)
     {
-        var response = await _elasticClient.SearchAsync<Employee>(searchDescriptor.AllIndices());
         
+        var response = await _elasticClient.SearchAsync<Employee>(searchDescriptor.AllIndices());
         return response.Hits.Select(x => x.Source).ToList();
     }
 
