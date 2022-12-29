@@ -14,7 +14,11 @@ builder.Services.AddScoped<ElasticRepository>();
 builder.Services.AddScoped<EmployeeService>();
 builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost"));
 builder.Services.AddSingleton<ElasticClient>(s => new ElasticClient(new ConnectionSettings(new Uri("http://localhost:9200/"))));
+builder.Services.AddHostedService<SubscribeBackgroundService>();
+builder.Services.AddSingleton<RedisService>();
+
 var app = builder.Build();
+
 // специальная настройка для работы с датой в ПГ
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 

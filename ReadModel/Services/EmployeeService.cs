@@ -10,18 +10,20 @@ public class EmployeeService
 {
     private readonly PgContext _pgContext;
     private readonly ElasticRepository _elasticRepository;
+    private readonly RedisService _redis;
 
-    public EmployeeService(PgContext pgContext, ElasticRepository elasticRepository)
+    public EmployeeService(PgContext pgContext, ElasticRepository elasticRepository, RedisService redis)
     {
         _pgContext = pgContext;
         _elasticRepository = elasticRepository;
+        _redis = redis;
     }
 
     public async Task<Employee> Create(Employee employee)
     {
         var result = await _pgContext.AddAsync(employee);
         await _pgContext.SaveChangesAsync();
-        await _elasticRepository.IndexDocument(result.Entity);
+        await _redis.Publish("create", new IndexEmployeeEvent(result.Entity));
 
         return result.Entity;
     }
@@ -35,7 +37,7 @@ public class EmployeeService
     {
         var result = _pgContext.Employees.Update(employee);
         await _pgContext.SaveChangesAsync();
-        await _elasticRepository.UpdateDocument(employee);
+        await _redis.Publish("update", new IndexEmployeeEvent(result.Entity));
 
         return result.Entity;
     }
